@@ -2,7 +2,8 @@ library(DBI)
 library(RPostgres)
 library(logger)
 library(glue)
-
+library(stringr)
+library(dplyr)
 
 connect_db <- function() {
 
@@ -40,7 +41,7 @@ inserir_dados <- function(dados, schema, table) {
 
 carregar_dados <- function(schema, table) {
   con <- connect_db()
-  dados <- DBI::dbReadTable(con, name = DBI::Id(schema='telemetria', table='base_fixa'))
+  dados <- DBI::dbReadTable(con, name = DBI::Id(schema=schema, table=table))
   DBI::dbDisconnect(con)
   return(dados)
 }

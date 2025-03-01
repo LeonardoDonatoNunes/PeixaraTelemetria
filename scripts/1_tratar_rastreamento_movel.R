@@ -1,10 +1,8 @@
-library(dplyr)
-library(stringr)
 source('scripts/funcoes.R')
 
-diretorio = 'rastreamento_movel'
+diretorio = 'dados/rastreamento_movel'
 arquivos <- list.files(diretorio)
-transmissores <- read.csv('dados/filtro/cmr.csv')
+marcacao <- carregar_dados(schema = 'telemetria', table = 'marcacao')
 
 # Junta os arquivos do monitoramento movel e corrige a data pela data escrita no arquivo do arquivo
 movel_bruto <- data.frame()
@@ -17,7 +15,8 @@ for (arquivo in arquivos) {
   dados_i =
     dados_i %>%
       dplyr::mutate(
-        data = as.Date(data_or, format="%m/%d/%y")
+        data = as.Date(data_or, format="%m/%d/%y"),
+        canal = ifelse(canal == 50, 100, canal)
         )
 
   dados_i =
@@ -36,7 +35,7 @@ for (arquivo in arquivos) {
 # Filtra os dados brutos
 movel_filtrado =
   movel_bruto %>%
-    dplyr::filter(radio_id %in% transmissores$transmissor_id) %>%
+    dplyr::filter(radio_id %in% marcacao$transmissor_id) %>%
     dplyr::arrange(radio_id, data_hora) %>%
     dplyr::group_by(data, radio_id) %>%
     dplyr::mutate(n = n()) %>%
@@ -53,23 +52,13 @@ movel_filtrado =
     dplyr::arrange(radio_id, data_hora)
 
 
-if(!dir.exists('movel_filtrado')) {
-  dir.create('movel_filtrado')
+if (!dir.exists('dados/movel_filtrado')) {
+  dir.create('dados/movel_filtrado')
 }
 
-write.csv(movel_filtrado, 'movel_filtrado/movel_filtrado.csv', row.names = FALSE)
+write.csv(movel_filtrado, 'dados/movel_filtrado/movel_filtrado.csv', row.names = FALSE)
 
 
 ## Inserir os dados no banco de dados
-conn = connect_db()
-
-DBI::dbWriteTable(
-  conn = conn,
-  name = DBI::Id(schema='telemetria', table='deteccoes_radio_movel'),
-  value = movel_filtrado,
-  overwrite = TRUE,
-  row.names = FALSE
-)
-
-DBI::dbDisconnect(conn)
+inserir_dados(movel_filtrado, schema = 'telemetria', table = 'deteccoes_radio_movel')
 
