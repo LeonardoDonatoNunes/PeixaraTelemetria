@@ -1,5 +1,7 @@
 library(DBI)
 library(RPostgres)
+library(logger)
+library(glue)
 
 
 connect_db <- function() {
@@ -13,12 +15,14 @@ connect_db <- function() {
     password = Sys.getenv("DB_PASSWORD")
   )
 
+  logger::log_info("Conexão realizada")
+
   return(con)
 
 }
 
 
-write_table <- function(dados, schema, table) {
+inserir_dados <- function(dados, schema, table) {
 
   con <- connect_db()
   DBI::dbWriteTable(
@@ -30,9 +34,11 @@ write_table <- function(dados, schema, table) {
   )
   DBI::dbDisconnect(con)
 
+  logger::log_info(glue::glue("Dados inseridos com sucesso na tabela {schema}.{table}"))
+
 }
 
-read_table <- function(schema, table) {
+carregar_dados <- function(schema, table) {
   con <- connect_db()
   dados <- DBI::dbReadTable(con, name = DBI::Id(schema='telemetria', table='base_fixa'))
   DBI::dbDisconnect(con)
