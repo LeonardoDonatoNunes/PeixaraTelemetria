@@ -4,6 +4,7 @@ library(logger)
 library(glue)
 library(stringr)
 library(dplyr)
+library(lubridate)
 
 connect_db <- function() {
 
@@ -20,6 +21,13 @@ connect_db <- function() {
 
   return(con)
 
+}
+
+criar_schema <- function(schema) {
+  con = connect_db()
+  DBI::dbExecute(con, glue::glue("create schema if not exists {schema};"))
+  logger::log_info(glue::glue("Schema {schema} criado!"))
+  DBI::dbDisconnect(con)
 }
 
 

@@ -60,5 +60,5 @@ write.csv(movel_filtrado, 'dados/movel_filtrado/movel_filtrado.csv', row.names =
 
 
 ## Inserir os dados no banco de dados
-inserir_dados(movel_filtrado, schema = 'telemetria', table = 'deteccoes_radio_movel')
+inserir_dados(movel_filtrado, schema = 'telemetria', table = 'deteccao_radio_movel')
 

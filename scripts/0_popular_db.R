@@ -1,6 +1,7 @@
-library(dplyr)
-library(lubridate)
 source('scripts/funcoes.R')
+
+# Cria o schema no banco caso não exista
+criar_schema('telemetria')
 
 # Insere a tabela de bases_fixas
 base_fixa = read.csv('dados/filtro/gerencia_radio.csv', encoding = 'latin1')

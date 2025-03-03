@@ -1,12 +1,18 @@
 library(dplyr)
 library(stringr)
-library(DBI)
 source('scripts/funcoes.R')
 
-dir_name = 'dados_combinados'
+dir_name = 'dados/dados_combinados'
 arquivos = list.files(dir_name)
-marcacao = read.csv('dados/filtro/transmissor.csv')
-bases = openxlsx::read.xlsx('dados/filtro/gerencia_radio.xlsx')
+marcacao = carregar_dados(schema = 'telemetria', table = 'marcacao')
+
+marcacao_clean <-
+  marcacao %>%
+  dplyr::select(
+    radio_id = transmissor_id,
+    data_hora_soltura,
+    data_hora_remocao) %>%
+  tail(-1) # Remove a primeira linha que tem um transmissor duplicado (precisa  verificar se está errado)
 
 
 dados_fixo <- data.frame()
@@ -23,10 +29,14 @@ for (arquivo in arquivos) {
 dados_filtro_1 <-
   dados_fixo %>%
   dplyr::filter(stringr::str_sub(radio_id, -3) != 999) %>%
-  dplyr::inner_join(marcacao, by = 'radio_id') %>%
+  dplyr::inner_join(marcacao_clean, by = 'radio_id') %>%
   dplyr::mutate(data_hora = as.POSIXct(data_hora)) %>%
   dplyr::distinct() %>%
-  dplyr::arrange(base_id, radio_id, data_hora)
+  dplyr::arrange(base_id, radio_id, data_hora) %>%
+  dplyr::filter(data_hora >= data_hora_soltura & (data_hora <= data_hora_remocao | is.na(data_hora_remocao))) %>%
+  dplyr::select(-c('data_hora_soltura', 'data_hora_remocao'))
+
+
 
 options(scipen = 999)
 
@@ -51,25 +61,12 @@ dados_filtro_2 <-
   ) %>%
   dplyr::ungroup() %>%
   dplyr::group_by(base_id, radio_id, bloco) %>%
-  dplyr::summarise(
-    data_hora_ini = min(data_hora),
-    data_hora_fim = max(data_hora),
-    n_deteccoes = n(),
-    tempo_residencia_s = as.integer(difftime(data_hora_fim, data_hora_ini, units = 'secs'))
-  ) %>%
+  dplyr::mutate(n_deteccoes = n()) %>%
   dplyr::filter(n_deteccoes >= numero_minimo_deteccoes_bloco) %>%
-  dplyr::select(-bloco)
+  dplyr::ungroup() %>%
+  dplyr::select(-c("time_diff","time_diff2","quebra","bloco","n_deteccoes"))
+
 
 ## Salvar os dados no DB
-conn = connect_db()
-
-DBI::dbWriteTable(
-  conn = conn,
-  name = DBI::Id(schema='telemetria', table='deteccoes_radio_fixo'),
-  value = dados_filtro_2,
-  overwrite = TRUE,
-  row.names = FALSE
-)
-
-DBI::dbDisconnect(conn)
+inserir_dados(dados_filtro_2, schema = 'telemetria', table = 'deteccao_radio_fixo')
 
