@@ -1,6 +1,4 @@
-library(dplyr)
-library(stringr)
-source('scripts/funcoes.R')
+source('scripts/utils_settings.R')
 
 dir_name = 'dados/dados_combinados'
 arquivos = list.files(dir_name)

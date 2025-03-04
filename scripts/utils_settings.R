@@ -5,6 +5,7 @@ library(glue)
 library(stringr)
 library(dplyr)
 library(lubridate)
+library(sf)
 
 connect_db <- function() {
 
@@ -62,3 +63,26 @@ get_sql <- function(stmt) {
   return(dados)
 
 }
+
+
+
+executar_sql <- function(stmt) {
+
+  con <- connect_db()
+  DBI::dbSendQuery(con, stmt)
+  DBI::dbDisconnect(con)
+  logger::log_info("Query executada")
+}
+
+
+carregar_geom <- function(query) {
+  con <- connect_db()
+  tabela <- sf::st_read(con, query = query)
+  DBI::dbDisconnect(con)
+  return(tabela)
+}
+
+
+
+executar_sql("CREATE EXTENSION IF NOT EXISTS postgis;")
+

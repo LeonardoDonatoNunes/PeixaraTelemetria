@@ -1,8 +1,27 @@
-source('scripts/funcoes.R')
+source('scripts/utils_settings.R')
 
 base_fixa = carregar_dados(schema = 'telemetria', table = 'base_fixa')
+marcacao = carregar_dados(schema = 'telemetria', table = 'marcacao')
 detec_movel = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_movel')
 detec_fixo = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_fixo')
+
+marcacao_clean <-
+  marcacao %>%
+  dplyr::mutate(
+    receptor_id = 0000,
+    base_id = 'MAR',
+    antena_id = 1,
+    n_deteccoes = 1
+  ) %>%
+  dplyr::select(
+    radio_id = transmissor_id,
+    base_id,
+    lat = lat_soltura,
+    long = long_soltura,
+    data_hora_ini = data_hora_soltura,
+    data_hora_fim = data_hora_soltura,
+    n_deteccoes
+  )
 
 base_fixa_clean <-
   base_fixa %>%
@@ -54,5 +73,12 @@ dados_consolidados <-
     data_hora_ini = min(data_hora),
     data_hora_fim = max(data_hora),
     n_deteccoes = n()
-  )
+  ) %>%
+  dplyr::ungroup() %>%
+  rbind(marcacao_clean) %>%
+  dplyr::arrange(radio_id, data_hora_ini)
 
+  inserir_dados(dados_consolidados, 'telemetria', 'dados_consolidados')
+
+  executar_sql("ALTER TABLE telemetria.dados_consolidados ADD COLUMN geom geometry(Point, 4326);")
+  executar_sql("UPDATE telemetria.dados_consolidados SET geom = ST_SetSRID(ST_MakePoint(long::double precision, lat::double precision), 4326);")

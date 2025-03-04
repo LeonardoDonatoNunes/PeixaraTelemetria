@@ -1,4 +1,4 @@
-source('scripts/funcoes.R')
+source('scripts/utils_settings.R')
 
 diretorio = 'dados/rastreamento_movel'
 arquivos <- list.files(diretorio)
