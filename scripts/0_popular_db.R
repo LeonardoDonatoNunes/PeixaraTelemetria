@@ -42,16 +42,16 @@ executar_sql("UPDATE telemetria.marcacao SET geom = ST_SetSRID(ST_MakePoint(long
 ## Cria o schema caso não exista
 criar_schema('geografia')
 
-## Inserir limites bacias
-regioes_hidro <- sf::st_read('dados/shp/regioes_hidro/SNIRH_RegioesHidrograficas_2020/SNIRH_RegioesHidrograficas_2020.shp')
-regioes_hidro <- sf::st_set_crs(regioes_hidro, 4326)
-inserir_dados(regioes_hidro, schema = 'geografia', table = 'regioes_hidro')
-
-
-## Inserir os cursos_dagua dos rios da bacia tocantins_araguaia
-cursos_dagua <- sf::st_read('dados/shp/linhas_rios/geoft_bho_curso_dagua.gpkg')
-cursos_dagua <- sf::st_transform(cursos_dagua, 4326)
-inserir_dados(cursos_dagua, schema = 'geografia', table = 'cursos_dagua')
+# ## Inserir limites bacias
+# regioes_hidro <- sf::st_read('dados/shp/regioes_hidro/SNIRH_RegioesHidrograficas_2020/SNIRH_RegioesHidrograficas_2020.shp')
+# regioes_hidro <- sf::st_set_crs(regioes_hidro, 4326)
+# inserir_dados(regioes_hidro, schema = 'geografia', table = 'regioes_hidro')
+#
+#
+# ## Inserir os cursos_dagua dos rios da bacia tocantins_araguaia
+# cursos_dagua <- sf::st_read('dados/shp/linhas_rios/geoft_bho_curso_dagua.gpkg')
+# cursos_dagua <- sf::st_transform(cursos_dagua, 4326)
+# inserir_dados(cursos_dagua, schema = 'geografia', table = 'cursos_dagua')
 
 
 
