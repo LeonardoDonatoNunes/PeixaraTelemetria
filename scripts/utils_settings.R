@@ -32,14 +32,15 @@ criar_schema <- function(schema) {
 }
 
 
-inserir_dados <- function(dados, schema, table) {
+inserir_dados <- function(dados, schema, table, append = FALSE, overwrite = TRUE) {
 
   con <- connect_db()
   DBI::dbWriteTable(
     conn = con,
     name = DBI::Id(schema=schema, table=table),
     value = dados,
-    overwrite = TRUE,
+    overwrite = overwrite,
+    append = append,
     row.names = FALSE
   )
   DBI::dbDisconnect(con)
@@ -85,4 +86,5 @@ carregar_geom <- function(query) {
 
 
 executar_sql("CREATE EXTENSION IF NOT EXISTS postgis;")
+executar_sql("CREATE EXTENSION pgrouting;")
 
