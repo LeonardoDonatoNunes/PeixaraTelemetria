@@ -11,7 +11,16 @@ base_fixa_clean <-
   dplyr::mutate(
     data_hora_intalacao = lubridate::dmy_hm(data_hora_intalacao, tz = "UTC"),
     lat = as.numeric(lat),
-    long = as.numeric(long)
+    long = as.numeric(long),
+    dist = dplyr::case_when(
+        base_id == 'BAN' ~ 687,
+        base_id == 'ARA' ~ 340,
+        base_id == 'ARU' ~ 527,
+        base_id == 'TOR' ~ 260,
+        base_id == 'COC' ~ 589,
+        base_id == 'RIB' ~ 210,
+        base_id == 'BRC' ~ 409
+      )
     )
 
 inserir_dados(base_fixa_clean, 'telemetria', table = "base_fixa")

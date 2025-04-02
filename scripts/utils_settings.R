@@ -6,6 +6,14 @@ library(stringr)
 library(dplyr)
 library(lubridate)
 library(sf)
+library(raster)
+library(gdistance)
+library(dplyr)
+library(sp)
+library(ggplot2)
+library(ggmap)
+library(ggspatial)
+library(osmdata)
 
 connect_db <- function() {
 
@@ -86,5 +94,29 @@ carregar_geom <- function(query) {
 
 
 executar_sql("CREATE EXTENSION IF NOT EXISTS postgis;")
-executar_sql("CREATE EXTENSION pgrouting;")
+executar_sql("CREATE EXTENSION IF NOT EXISTS pgrouting;")
+
+
+plotar_linha <- function(linha, pontos) {
+
+  bbox <- st_bbox(linha)
+  img <- terra::rast('dados/geograficos/distancias.tiff')
+  img_crop <- terra::crop(img, bbox)
+  img_df <- as.data.frame(img_crop, xy = TRUE)
+
+  mapa <- ggplot() +
+    geom_raster(data = img_df, aes(x = x, y = y, fill = area_estudo)) +
+    scale_fill_gradientn(colours = terrain.colors(10)) +
+    geom_sf(data = linha, color = "red", size = 1.2) +
+    geom_sf(data = pontos, color = "red", size = 1.2) +
+    coord_sf() +
+    annotation_scale(location = "bl", width_hint = 0.5) +
+    annotation_north_arrow(location = "br", which_north = "true",
+                           style = north_arrow_fancy_orienteering()) +
+    theme_minimal() +
+    theme(legend.position = "none")
+
+  return(mapa)
+}
+
 

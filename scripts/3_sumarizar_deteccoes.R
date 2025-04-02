@@ -4,6 +4,10 @@ base_fixa = carregar_dados(schema = 'telemetria', table = 'base_fixa')
 marcacao = carregar_dados(schema = 'telemetria', table = 'marcacao')
 detec_movel = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_movel')
 detec_fixo = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_fixo')
+area_estudo <- raster::raster('dados/geograficos/distancias.tiff') # Raster com as distancias na area de estudo
+
+crs_utm = CRS("+proj=utm +zone=23 +south +datum=WGS84 +units=m +no_defs")
+crs_geo = CRS("+proj=longlat +datum=WGS84")
 
 marcacao_clean <-
   marcacao %>%
@@ -16,11 +20,11 @@ marcacao_clean <-
   dplyr::select(
     radio_id = transmissor_id,
     base_id,
-    lat = lat_soltura,
-    long = long_soltura,
-    data_hora_ini = data_hora_soltura,
-    data_hora_fim = data_hora_soltura,
-    n_deteccoes
+    antena_id,
+    receptor_id,
+    lat,
+    long,
+    data_hora = data_hora_soltura
   )
 
 base_fixa_clean <-
@@ -51,6 +55,20 @@ detec_fixo_clean <-
   left_join(base_fixa_clean, by = "base_id")
 
 
+dados_consolidados_total <-
+  detec_fixo_clean %>%
+  rbind(detec_movel_clean) %>%
+  rbind(marcacao_clean) %>%
+  dplyr::arrange(radio_id, data_hora)
+
+
+
+dados_consolidados_total_sp <- sp::spTransform(as(st_as_sf(dados_consolidados_total, coords = c("long", "lat"), crs = crs_geo), 'Spatial'),  crs_utm)
+valores_extraidos <- extract(area_estudo, dados_consolidados_total_sp)
+dados_consolidados_total$distancia <- valores_extraidos/1000
+inserir_dados(dados_consolidados_total, 'telemetria', 'dados_consolidados_total')
+
+
 
 dados_consolidados <-
   detec_fixo_clean %>%
@@ -68,17 +86,33 @@ dados_consolidados <-
     ),
     grupo = cumsum(quebra)
   ) %>%
-  dplyr::group_by(radio_id, base_id, lat, long) %>%
+  dplyr::group_by(grupo, radio_id, base_id, lat, long) %>%
   dplyr::summarise(
     data_hora_ini = min(data_hora),
     data_hora_fim = max(data_hora),
     n_deteccoes = n()
   ) %>%
   dplyr::ungroup() %>%
-  rbind(marcacao_clean) %>%
+  dplyr::select(-grupo) %>%
+  rbind(marcacao_clean %>% dplyr::mutate(
+    n_deteccoes = 1,
+    data_hora_fim = data_hora
+  ) %>%  dplyr::select(
+    radio_id,
+    base_id,
+    lat,
+    long,
+    data_hora_ini=data_hora,
+    data_hora_fim,
+    n_deteccoes
+  )) %>%
   dplyr::arrange(radio_id, data_hora_ini)
 
+  dados_consolidados_sp <- sp::spTransform(as(st_as_sf(dados_consolidados, coords = c("long", "lat"), crs = crs_geo), 'Spatial'),  crs_utm)
+  valores_extraidos <- extract(area_estudo, dados_consolidados_sp)
+  dados_consolidados$distancia <- valores_extraidos/1000
   inserir_dados(dados_consolidados, 'telemetria', 'dados_consolidados')
+
 
   executar_sql("ALTER TABLE telemetria.dados_consolidados ADD COLUMN geom geometry(Point, 4326);")
   executar_sql("UPDATE telemetria.dados_consolidados SET geom = ST_SetSRID(ST_MakePoint(long::double precision, lat::double precision), 4326);")
