@@ -56,7 +56,7 @@ criar_schema('geografia')
 
 ## Inserir a linha do rio tocantins_araguaia
 rio <- sf::st_read('dados/shp/linha_tocantins_araguaia/linha_tocantins_araguaia.shp')
-cursos_dagua <- sf::st_transform(cursos_dagua, 4326)
+cursos_dagua <- sf::st_transform(rio, 4326)
 inserir_dados(cursos_dagua, schema = 'geografia', table = 'tocantins_araguaia')
 
 
