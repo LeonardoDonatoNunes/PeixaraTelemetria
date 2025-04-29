@@ -28,6 +28,7 @@ for (arquivo in arquivos) {
 ## Remover registros duplicados em todas as colunas
 dados_filtro_1 <-
   dados_fixo %>%
+  dplyr::mutate(radio_id = ifelse(radio_id == 15022, 10022, radio_id)) %>%
   dplyr::inner_join(marcacao_clean, by = 'radio_id') %>%
   dplyr::mutate(data_hora = as.POSIXct(data_hora)) %>%
   dplyr::distinct() %>%

@@ -28,7 +28,9 @@ executar_sql("ALTER TABLE telemetria.base_fixa ADD COLUMN geom geometry(Point, 4
 executar_sql("UPDATE telemetria.base_fixa SET geom = ST_SetSRID(ST_MakePoint(long, lat), 4326);")
 
 # Insere a tabela de marcacao
-marcacao <- read.csv2('dados/filtro/cmr.csv', sep = ",")
+marcacao <- read.csv2('dados/filtro/cmr.csv')
+
+
 
 marcacao_clean <-
   marcacao %>%

@@ -27,7 +27,8 @@ for (arquivo in arquivos) {
     dados_i %>%
       dplyr::mutate(
         data = as.Date(data_or, format="%m/%d/%y"),
-        canal = ifelse(canal == 50, 100, canal)
+        canal = ifelse(canal == 50, 100, canal),
+        canal = ifelse(canal == 150, 100, canal)
         ) %>%
     dplyr::filter(data_or != "01/05/80")
 

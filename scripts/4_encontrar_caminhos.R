@@ -135,6 +135,8 @@ dados_total <- get_sql('select radio_id, base_id, data_hora, lat, long, distanci
 dados_final <-
   dados_total %>%
   rbind(df_pontos) %>%
+  dplyr::mutate(data_hora = as.Date(data_hora)) %>%
+  dplyr::distinct() %>%
   dplyr::arrange(radio_id, data_hora)
 
 inserir_dados(dados_final, schema = 'telemetria', table = 'movimentos', append = FALSE)

@@ -116,3 +116,4 @@ dados_consolidados <-
 
   executar_sql("ALTER TABLE telemetria.dados_consolidados ADD COLUMN geom geometry(Point, 4326);")
   executar_sql("UPDATE telemetria.dados_consolidados SET geom = ST_SetSRID(ST_MakePoint(long::double precision, lat::double precision), 4326);")
+
