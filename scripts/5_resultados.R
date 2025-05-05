@@ -37,7 +37,10 @@ dados %>%
     total = abs(jusante) + abs(montante),
     jusante_max = max(abs(deslocamento[sentido == "Jusante"]), na.rm = TRUE),
     montante_max = max(abs(deslocamento[sentido == "Montante"]), na.rm = TRUE),
-    atividade_dias = as.numeric(difftime(max(data_hora_fim), min(data_hora_ini), units = 'days')),
+    # atividade_dias = as.numeric(difftime(max(data_hora_fim), min(data_hora_ini), units = 'days')),
+    atividade_dias = as.numeric(difftime(
+      max(data_hora_ini[deslocamento != 0], na.rm = TRUE),
+      min(data_hora_ini[deslocamento != 0], na.rm = TRUE), units = "days")),
     tempo_pri_mov = first(tempo),
     tempo_pri_mov_mont = first(tempo[sentido == "Montante"]),
     tempo_pri_mov_jus = first(tempo[sentido == "Jusante"]),
