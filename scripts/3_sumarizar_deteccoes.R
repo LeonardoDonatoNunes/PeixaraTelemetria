@@ -3,6 +3,7 @@ source('scripts/utils_settings.R')
 base_fixa = carregar_dados(schema = 'telemetria', table = 'base_fixa')
 marcacao = carregar_dados(schema = 'telemetria', table = 'marcacao')
 detec_movel = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_movel')
+detec_movel_SRX1200 = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_movel_SRX1200')
 detec_fixo = carregar_dados(schema = 'telemetria', table = 'deteccao_radio_fixo')
 area_estudo <- raster::raster('dados/geograficos/distancias.tiff') # Raster com as distancias na area de estudo
 
@@ -48,6 +49,22 @@ detec_movel_clean <-
     "long"
   )
 
+detec_movel_SRX1200_clean <-
+  detec_movel_SRX1200 %>%
+  dplyr::mutate(
+    receptor_id = 9999,
+    base_id = 'MOV',
+    antena_id = 1
+  ) %>%
+  dplyr::select(
+    "receptor_id",
+    "base_id",
+    "antena_id",
+    "radio_id",
+    "data_hora",
+    "lat",
+    "long"
+  )
 
 detec_fixo_clean <-
   detec_fixo %>%
@@ -58,6 +75,7 @@ detec_fixo_clean <-
 dados_consolidados_total <-
   detec_fixo_clean %>%
   rbind(detec_movel_clean) %>%
+  rbind(detec_movel_SRX1200_clean) %>%
   rbind(marcacao_clean) %>%
   dplyr::arrange(radio_id, data_hora)
 
@@ -73,6 +91,7 @@ inserir_dados(dados_consolidados_total, 'telemetria', 'dados_consolidados_total'
 dados_consolidados <-
   detec_fixo_clean %>%
   rbind(detec_movel_clean) %>%
+  rbind(detec_movel_SRX1200_clean) %>%
   dplyr::arrange(radio_id, data_hora) %>%
   dplyr::group_by(radio_id) %>%
   dplyr::mutate(
