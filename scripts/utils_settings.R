@@ -92,7 +92,6 @@ carregar_geom <- function(query) {
 }
 
 
-
 executar_sql("CREATE EXTENSION IF NOT EXISTS postgis;")
 executar_sql("CREATE EXTENSION IF NOT EXISTS pgrouting;")
 
