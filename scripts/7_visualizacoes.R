@@ -82,7 +82,7 @@ ggsave('img/graficos/movimentos_dias.png', plot = d, width = 8, height = 5)
 # deslocamento
 dados_longos <- resultados %>%
   dplyr::select(radio_id, taxa_desloc_media_kmrd, jusante_max, montante_max) %>%
-  pivot_longer(
+  tidyr::pivot_longer(
     cols = c(taxa_desloc_media_kmrd, jusante_max, montante_max),
     names_to = "tipo",
     values_to = "valor") %>%
@@ -120,4 +120,57 @@ f <- ggplot(dados_longos, aes(x = factor(radio_id), y = valor, fill = tipo)) +
   );f
 
 ggsave('img/graficos/deslocamento_medio.png', plot = f, width = 8, height = 5)
+
+
+
+
+bases <- get_sql('select base_id, dist from telemetria.base_fixa bf;') %>% dplyr::mutate(base_id = stringr::str_squish(base_id))
+dados_final <- get_sql('select * from telemetria.movimentos;') %>% dplyr::mutate(base_id = stringr::str_squish(base_id))
+
+
+library(ggimage)
+
+peixes <- unique(dados_final$radio_id)
+
+
+for (peixe in peixes) {
+
+  dados_i <- dados_final %>%
+    filter(radio_id == peixe)
+
+  dt_min <- min(dados_i$data_hora)
+  dt_max <- max(dados_i$data_hora)
+
+
+
+
+  grafico <- ggplot(dados_i, aes(x = data_hora, y = distancia) ) +
+    geom_line() +
+    geom_hline(data = bases, aes(yintercept = dist), linetype = 2, alpha = 0.3, col='red') +
+    geom_text(data = bases, aes(x = dt_max, y = dist, label = base_id), hjust = -1, color='red', alpha=0.5) +
+    geom_point(data=dados_i %>% filter(!base_id %in% c('EST', 'MAR', 'MOV')), aes(x = data_hora, y = distancia), shape = 16, size = 2) +
+    geom_point(data=dados_i %>% filter(base_id == 'MOV'), aes(x = data_hora, y = distancia), shape = 17, size = 2, col='blue') +
+    geom_image(data=dados_i %>% filter(base_id == 'MAR'), aes(x = data_hora, y = distancia, image = 'img/piraiba.png'), size = 0.1) +
+    coord_cartesian(clip = 'off') +
+    scale_y_reverse() +
+    theme_classic() +
+    theme(
+      plot.margin = margin(4,40,4,4),
+      axis.line = element_blank()) +
+    labs(
+      x=NULL,
+      y='Distância a partir do km 0 de rio (Km)',
+      title = paste0('Movimentos do indivíduo: ', peixe)
+    )
+
+  ggsave(filename = paste0('img/graficos/', peixe, '.png'), grafico, width = 8, height = 4)
+
+}
+
+
+
+
+
+
+
 
