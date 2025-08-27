@@ -6,9 +6,10 @@ arquivos <- list.files(diretorio)
 marcacao <- carregar_dados(schema = 'telemetria', table = 'marcacao')
 
 df_bi <- read.csv('dados/filtro/transmissor.csv') %>%
-  dplyr::select(-transmissor_id,
-                transmissor_id = radio_id,
-                bi = intervalo_radio)
+  dplyr::select(
+    transmissor_id = radio_id,
+   bi = intervalo_radio
+  )
 
 marcacao <- marcacao %>%
   dplyr::select(transmissor_id, data_hora_soltura, data_hora_remocao) %>%
