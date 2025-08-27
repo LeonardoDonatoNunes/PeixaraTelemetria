@@ -1,0 +1,8 @@
+source('scripts/0_popular_db.R')
+source('scripts/1_tratar_rastreamento_movel.R')
+source('scripts/1.1_tratar_rastreamento_movel_SRX1200.R')
+source('scripts/2_tratamento_dados_fixos.R')
+source('scripts/3_sumarizar_deteccoes.R')
+source('scripts/4_encontrar_caminhos.R')
+source('scripts/5_resultados.R')
+source('scripts/6_salvar_arquivos_csv_app.R')

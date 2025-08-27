@@ -61,3 +61,10 @@ inserir_dados(cursos_dagua, schema = 'geografia', table = 'tocantins_araguaia')
 
 
 
+
+
+
+
+
+
+
