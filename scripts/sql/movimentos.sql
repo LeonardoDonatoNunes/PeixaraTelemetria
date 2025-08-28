@@ -15,12 +15,15 @@ with
 			row_number() over (partition by radio_id, grupo_ order by data_hora desc) as ordem_desc
 		from set_2
 	)
-	select radio_id as transmissor_id,
-	       data_hora,
-	       distancia,
-	       base_id,
-	       lat,
-	       long
+	select set_3.radio_id as transmissor_id,
+	       set_3.data_hora,
+	       set_3.distancia,
+	       set_3.base_id,
+	       set_3.lat,
+	       set_3.long,
+	       dct.distancia - set_3.distancia as distancia_rel_soltura
 	from set_3
-	where ordem_asc  = 1 or ordem_desc = 1
-	order by transmissor_id, data_hora desc;
+	left join telemetria.dados_consolidados_total dct on set_3.radio_id = dct.radio_id and dct.base_id  = 'MAR'
+	where set_3.ordem_asc  = 1 or set_3.ordem_desc = 1
+	order by transmissor_id, set_3.data_hora desc;
+
