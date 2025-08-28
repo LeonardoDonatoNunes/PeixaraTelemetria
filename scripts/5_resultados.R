@@ -28,7 +28,14 @@ dados %>%
       ),
     deslocamento = ifelse(is.na(deslocamento), 0, deslocamento),
     tempo = as.numeric(difftime(data_hora_dest, data_hora_ini, units = 'days')),
-    taxa_movimento = abs(deslocamento)/tempo
+    taxa_movimento = abs(deslocamento)/tempo,
+    dist_da_soltura = first(distancia) - distancia,
+    sentido_rel_soltura = dplyr::case_when(
+      dist_da_soltura == 0 ~ "Jusante",
+      is.na(dist_da_soltura) ~ "Jusante",
+      dist_da_soltura > 0 ~ "Jusante",
+      dist_da_soltura < 0 ~ "Montante"
+    )
   ) %>%
   dplyr::group_by(radio_id) %>%
   dplyr::summarise(
@@ -36,7 +43,10 @@ dados %>%
     montante = sum(deslocamento[sentido == "Montante"], na.rm = TRUE) * -1,
     total = abs(jusante) + abs(montante),
     jusante_max = max(abs(deslocamento[sentido == "Jusante"]), na.rm = TRUE),
-    montante_max = max(abs(deslocamento[sentido == "Montante"]), na.rm = TRUE),
+    montante_max = ifelse(
+      sum(deslocamento[sentido == "Montante"]) < 0,
+      max(deslocamento[sentido == "Montante"], na.rm = TRUE) * -1, 0
+    ),
     # atividade_dias = as.numeric(difftime(max(data_hora_fim), min(data_hora_ini), units = 'days')),
     atividade_dias = if (all(is.na(data_hora_ini[deslocamento != 0]))) {0
     } else {as.numeric(difftime(
@@ -51,7 +61,12 @@ dados %>%
     taxa_desloc_mont_media_kmrd = mean(taxa_movimento[sentido == "Montante"], na.rm = TRUE),
     taxa_desloc_jus_media_kmrd = mean(taxa_movimento[sentido == "Jusante"], na.rm = TRUE),
     jusante_max = ifelse(is.infinite(jusante_max), 0, jusante_max),
-    montante_max = ifelse(is.infinite(montante_max), 0, montante_max)
+    montante_max = ifelse(is.infinite(montante_max), 0, montante_max),
+    dist_da_soltura_max = max(abs(dist_da_soltura)),
+    jusante_max_rel_soltura = max(dist_da_soltura[sentido_rel_soltura == "Jusante"], na.rm = TRUE),
+    montante_max_rel_soltra = ifelse(
+      sum(dist_da_soltura[sentido_rel_soltura == "Montante"]) < 0,
+      min(dist_da_soltura[sentido_rel_soltura == "Montante"], na.rm = TRUE) * -1, 0)
   ) %>%
   dplyr::ungroup() %>%
   dplyr::mutate(
