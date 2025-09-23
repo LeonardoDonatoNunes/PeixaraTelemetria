@@ -3,7 +3,7 @@ source('scripts/utils_settings.R')
 dir_name = 'dados/dados_combinados'
 arquivos = list.files(dir_name)
 marcacao = carregar_dados(schema = 'telemetria', table = 'marcacao')
-df_bi <- read.csv('dados/filtro/transmissor.csv') %>% dplyr::select(-transmissor_id, radio_id, bi = intervalo_radio)
+df_bi <- read.csv('dados/filtro/transmissor.csv', sep = ";") %>% dplyr::select(-transmissor_id, radio_id, bi = intervalo_radio, -duracao_estimada)
 
 marcacao_clean <-
   marcacao %>%
