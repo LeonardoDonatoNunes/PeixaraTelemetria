@@ -16,5 +16,5 @@ for (arquivo in arquivos) {
   path = paste(dir_root, arquivo, sep = '/')
   stmt = paste(readLines(path), collapse = "\n")
   df_i = get_sql(stmt)
-  write.csv(df_i, file = file_name, row.names = FALSE)
+  write.csv(df_i, file = file_name, row.names = FALSE, fileEncoding = "UTF8")
 }
