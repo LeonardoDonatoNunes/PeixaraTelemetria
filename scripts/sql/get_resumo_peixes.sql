@@ -15,6 +15,8 @@ select m.transmissor_id
        ,r.dist_da_soltura_max
        ,r.jusante_max_rel_soltura
        ,r.montante_max_rel_soltra
+       ,m.nome_comum
+       ,m.dh_termino_bateria
 from telemetria.marcacao m
 left join telemetria.resultados r on m.transmissor_id = r.radio_id::int
 left join lateral (
