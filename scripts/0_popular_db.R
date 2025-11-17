@@ -28,7 +28,7 @@ executar_sql("ALTER TABLE telemetria.base_fixa ADD COLUMN geom geometry(Point, 4
 executar_sql("UPDATE telemetria.base_fixa SET geom = ST_SetSRID(ST_MakePoint(long, lat), 4326);")
 
 # Insere a tabela de marcacao
-marcacao <- read.csv2('dados/filtro/cmr.csv', sep =",")
+marcacao <- read.csv2('dados/filtro/cmr.csv', sep =";")
 df_bi <- read.csv('dados/filtro/transmissor.csv', sep = ";") %>%
   dplyr::select(transmissor_id = radio_id, dh_termino_bateria = duracao_estimada, nome_comum = sp) %>%
   dplyr::mutate(dh_termino_bateria = lubridate::as_datetime(dh_termino_bateria, format = "%d/%m/%Y %H:%M"))
@@ -48,7 +48,7 @@ marcacao_clean <-
   dplyr::left_join(df_bi, by = 'transmissor_id')
 
 inserir_dados(marcacao_clean, schema = "telemetria", table = "marcacao")
-executar_sql("ALTER TABLE telemetria.marcacao ADD COLUMN  geometry(Point, 4326);")
+executar_sql("ALTER TABLE telemetria.marcacao ADD COLUMN  geom geometry(Point, 4326);")
 executar_sql("UPDATE telemetria.marcacao SET geom = ST_SetSRID(ST_MakePoint(long, lat), 4326);")
 
 
