@@ -43,7 +43,7 @@ marcacao_clean <-
     lat = as.numeric(lat_soltura),
     long = as.numeric(long_soltura)
   ) %>%
-  dplyr::filter(!transmissor_id %in% c(5020, 5022)) %>%
+  dplyr::filter(!transmissor_id %in% c(5020, 5022, 10013, 5003, 10011, 10024, 78037)) %>%
   dplyr::select(-lat_soltura, -long_soltura) %>%
   dplyr::left_join(df_bi, by = 'transmissor_id')
 
