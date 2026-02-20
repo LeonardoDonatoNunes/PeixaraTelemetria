@@ -127,7 +127,7 @@ dados_consolidados <-
   )) %>%
   dplyr::arrange(radio_id, data_hora_ini)
 
-dados_consolidados <- dados_consolidados[-141, ] #excluir registro do ID 78035, base BAN, manualmente
+# dados_consolidados <- dados_consolidados[-141, ] #excluir registro do ID 78035, base BAN, manualmente
 
   dados_consolidados_sp <- sp::spTransform(as(st_as_sf(dados_consolidados, coords = c("long", "lat"), crs = crs_geo), 'Spatial'),  crs_utm)
   valores_extraidos <- extract(area_estudo, dados_consolidados_sp)
