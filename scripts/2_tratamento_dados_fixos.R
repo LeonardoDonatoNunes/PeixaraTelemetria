@@ -11,7 +11,7 @@ marcacao_clean <-
     radio_id = transmissor_id,
     data_hora_soltura,
     data_hora_remocao) %>%
-  tail(-1) %>% # Remove a primeira linha que tem um transmissor duplicado (precisa  verificar se está errado)
+  # tail(-1) %>% # Remove a primeira linha que tem um transmissor duplicado (precisa  verificar se está errado)
   dplyr::left_join(df_bi) %>%
   dplyr::mutate(bi = ifelse(is.na(bi), 3, bi))
 
